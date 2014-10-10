@@ -1,0 +1,39 @@
+---
+- name: reload services
+  shell: systemctl daemon-reload
+
+- name: restart postfix
+  service:
+    name=postfix
+    state=restarted
+    enabled=yes
+
+- name: restart dovecot
+  service:
+    name=dovecot
+    state=restarted
+    enabled=yes
+
+- name: restart dspam
+  service:
+    name=dspam
+    state=restarted
+    enabled=yes
+
+- name: restart opendkim
+  service:
+    name=opendkim
+    state=restarted
+    enabled=yes
+
+- name: gen virtual_domains
+  shell: postmap /etc/postfix/virtual_domains
+  notify: restart postfix
+
+- name: gen virtual_aliases
+  shell: postmap /etc/postfix/virtual_aliases
+  notify: restart postfix
+
+- name: gen aliases
+  shell: postmap /etc/postfix/aliases
+  notify: restart postfix

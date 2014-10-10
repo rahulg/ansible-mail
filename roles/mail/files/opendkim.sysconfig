@@ -1,0 +1,11 @@
+# Set the necessary startup options
+OPTIONS="-x /etc/opendkim.conf -P /var/run/opendkim/opendkim.pid"
+
+# Determine whether default DKIM keys are automatically created on start
+AUTOCREATE_DKIM_KEYS=NO
+
+# Set the default DKIM selector
+DKIM_SELECTOR=ilos
+
+# Set the default DKIM key location
+DKIM_KEYDIR=/etc/opendkim/keys

@@ -1,0 +1,19 @@
+---
+packages:
+  - postfix
+  - dovecot
+  - dovecot-pigeonhole
+  - dspam
+  - dspam-hash
+  - opendkim
+
+pips:
+  - pypolicyd-spf
+
+dovecot:
+  postmaster: postmaster@example.com
+  adm:
+    port: 10993
+    password: "ZGllcXVlaXRob29waGFwZWlqZWVxdWVldmllZGFlbGVlcXVhZWplYmVlZ2hlaWd1ZGFleGFpbmVlcmFobmlqYQo="
+
+mail_ssl: "{{ ssl.examplecom }}"

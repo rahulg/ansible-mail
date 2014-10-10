@@ -1,0 +1,6 @@
+# OPENDKIM SIGNING TABLE
+# This table controls how to apply one or more signatures to outgoing messages based
+# on the address found in the From: header field. In simple terms, this tells
+# OpenDKIM "how" to apply your keys.
+
+*@example.com default._domainkey.example.com

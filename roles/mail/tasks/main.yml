@@ -1,0 +1,155 @@
+---
+- name: install packages
+  yum:
+    name={{ item }}
+    state=latest
+  with_items: packages
+
+
+- name: install pips via yum
+  yum:
+    name={{ item }}
+    state=latest
+  with_items: pips
+  when: "'el7' not in group_names"
+
+- name: install pip
+  yum:
+    name=python-pip
+    state=latest
+  when: "'el7' in group_names"
+
+- name: install pips
+  pip:
+    name={{ item }}
+    state=latest
+  with_items: pips
+  when: "'el7' in group_names"
+
+- name: copy dovecot service file
+  copy:
+    src=dovecot.service
+    dest=/etc/systemd/system/dovecot.service
+    owner=root
+    group=root
+    mode=0644
+  notify: reload services
+
+- name: copy postfix config
+  template:
+    src={{ item }}
+    dest=/etc/postfix/{{ item }}
+    owner=root
+    group=root
+    mode=0644
+  notify: restart postfix
+  with_items:
+    - main.cf
+    - master.cf
+
+- name: copy dovecot config
+  template:
+    src=dovecot.conf
+    dest=/etc/dovecot/dovecot.conf
+    owner=root
+    group=root
+    mode=0644
+  notify: restart dovecot
+
+- name: copy dspam config
+  template:
+    src=dspam.conf
+    dest=/etc/dspam.conf
+    owner=root
+    group=mail
+    mode=0640
+  notify: restart dspam
+
+- name: copy virtual domains
+  copy:
+    src=virtual_domains
+    dest=/etc/postfix/virtual_domains
+    owner=root
+    group=mail
+    mode=0640
+  notify: gen virtual_domains
+
+- name: copy virtual aliases
+  copy:
+    src=virtual_aliases
+    dest=/etc/postfix/virtual_aliases
+    owner=root
+    group=mail
+    mode=0640
+  notify: gen virtual_aliases
+
+- name: copy aliases
+  copy:
+    src=aliases
+    dest=/etc/postfix/aliases
+    owner=root
+    group=mail
+    mode=0640
+  notify: gen aliases
+
+- name: copy accounts
+  copy:
+    src=passwd
+    dest=/etc/dovecot/passwd
+    owner=root
+    group=mail
+    mode=0660
+  notify: restart dovecot
+
+- name: copy opendkim sysconfig
+  copy:
+    src=opendkim.sysconfig
+    dest=/etc/sysconfig/opendkim
+    owner=root
+    group=root
+    mode=0644
+
+- name: copy opendkim master config
+  template:
+    src=opendkim.conf
+    dest=/etc/opendkim.conf
+    owner=root
+    group=root
+    mode=0644
+  notify: restart opendkim
+
+- name: copy opendkim config
+  copy:
+    src={{ item }}
+    dest=/etc/opendkim/
+    owner=opendkim
+    group=opendkim
+    mode=0640
+  when: "'mail_gateway' in group_names"
+  notify: restart opendkim
+  with_items:
+    - KeyTable
+    - SigningTable
+
+- name: copy opendkim trusted hosts
+  template:
+    src={{ item }}
+    dest=/etc/opendkim/
+    owner=opendkim
+    group=opendkim
+    mode=0640
+  when: "'mail_gateway' in group_names"
+  notify: restart opendkim
+  with_items:
+    - TrustedHosts
+
+- name: copy opendkim keys
+  copy:
+    src={{ item }}
+    dest=/etc/opendkim/keys/
+    owner=opendkim
+    group=opendkim
+    mode=0600
+  when: "'mail_gateway' in group_names"
+  notify: restart opendkim
+  with_fileglob: "dkim-keys/{{ inventory_hostname }}/*.key"
