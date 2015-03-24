@@ -2,6 +2,12 @@
 - name: reload services
   shell: systemctl daemon-reload
 
+- name: reload postfix
+  service:
+    name=postfix
+    state=reloaded
+    enabled=yes
+
 - name: restart postfix
   service:
     name=postfix
@@ -28,12 +34,12 @@
 
 - name: gen virtual_domains
   shell: postmap /etc/postfix/virtual_domains
-  notify: restart postfix
+  notify: reload postfix
 
 - name: gen virtual_aliases
   shell: postmap /etc/postfix/virtual_aliases
-  notify: restart postfix
+  notify: reload postfix
 
 - name: gen aliases
-  shell: postmap /etc/postfix/aliases
-  notify: restart postfix
+  shell: postalias /etc/postfix/aliases
+  notify: reload postfix
